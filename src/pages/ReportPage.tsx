@@ -1,11 +1,15 @@
-import { PagePlaceholder } from '@/components/layout/PagePlaceholder'
+import { ComingSoonPage } from '@/components/common/ComingSoonPage'
 
 export function ReportPage() {
   return (
-    <PagePlaceholder
+    <ComingSoonPage
       title="改善レポート"
-      description="投稿から検討・試行・結果の共有までの流れをまとめて表示します。"
-      plannedPhase="Phase 4"
+      description="困りごとが伝えられてから、検討・試行を経て結果が共有されるまでの流れをまとめる画面です。"
+      plannedFeatures={[
+        '投稿から結果の共有までの流れを、時系列で確認する',
+        '対応状況ごとの件数を確認する',
+        '改善につながった取り組みを振り返る',
+      ]}
     />
   )
 }
