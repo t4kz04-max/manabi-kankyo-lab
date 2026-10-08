@@ -1,6 +1,7 @@
 import { Outlet, ScrollRestoration } from 'react-router'
 import { SiteFooter } from '@/components/layout/SiteFooter'
 import { SiteHeader } from '@/components/layout/SiteHeader'
+import { StorageNoticeBanner } from '@/components/layout/StorageNoticeBanner'
 
 /** 全画面共通のレイアウト（ヘッダー・本文・フッター） */
 export function AppLayout() {
@@ -13,6 +14,7 @@ export function AppLayout() {
         本文へスキップ
       </a>
       <SiteHeader />
+      <StorageNoticeBanner />
       <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
         <Outlet />
       </main>

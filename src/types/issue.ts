@@ -6,22 +6,28 @@
 /** 困りごとのカテゴリ */
 export type IssueCategory = 'sound' | 'light'
 
-/** 困りごとの種類 */
+/** 困りごとの種類（カテゴリごとの選択肢は lib/labels.ts の ISSUE_TYPES_BY_CATEGORY） */
 export type IssueType =
+  // 音
   | 'chair-noise'
   | 'surrounding-noise'
+  | 'hallway-noise'
+  | 'other-sound'
+  // 光
   | 'window-glare'
   | 'lighting-glare'
-  | 'other'
+  | 'board-reflection'
+  | 'room-brightness'
 
-/** 困りごとが起きる場面 */
+/** 困りごとが起きる場面（カテゴリごとの選択肢は lib/labels.ts の SITUATIONS_BY_CATEGORY） */
 export type IssueSituation =
   | 'class-start'
   | 'during-class'
   | 'group-work'
   | 'test'
   | 'break-time'
-  | 'other'
+  | 'time-of-day'
+  | 'specific-place'
 
 /** 対応状況 */
 export type IssueStatus =
@@ -64,6 +70,13 @@ export interface Improvement {
   updatedAt: string
   /** 架空のデモデータであることを示すフラグ */
   isDemo: boolean
+}
+
+/** 生徒が投稿フォームで入力する内容（すべて選択式で、自由記述や個人情報は含まない） */
+export interface NewIssueInput {
+  category: IssueCategory
+  situation: IssueSituation
+  issueType: IssueType
 }
 
 /** localStorage に保存するデモ状態全体 */

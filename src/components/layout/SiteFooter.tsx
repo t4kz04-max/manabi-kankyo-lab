@@ -1,6 +1,7 @@
 import { Info } from 'lucide-react'
 import { Link } from 'react-router'
 import { LogoMark } from '@/components/brand/LogoMark'
+import { DemoResetButton } from '@/components/layout/DemoResetButton'
 import { NAV_SECTIONS } from '@/components/layout/navigation'
 
 export function SiteFooter() {
@@ -37,9 +38,12 @@ export function SiteFooter() {
         </nav>
       </div>
       <div className="border-t border-border">
-        <p className="page-container py-4 text-xs text-muted-foreground">
-          NIJIN教育万博2026 アイデアコンテスト応募用プロトタイプ
-        </p>
+        <div className="page-container flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs text-muted-foreground">
+            NIJIN教育万博2026 アイデアコンテスト応募用プロトタイプ
+          </p>
+          <DemoResetButton />
+        </div>
       </div>
     </footer>
   )
