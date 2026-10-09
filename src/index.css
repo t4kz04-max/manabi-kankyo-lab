@@ -101,6 +101,8 @@
     @apply font-sans;
     -webkit-text-size-adjust: 100%;
     scroll-padding-top: 5rem;
+    /* 画面下部に固定した保存バーにフォーカス中の要素が隠れないようにする */
+    scroll-padding-bottom: 7rem;
   }
   body {
     @apply bg-background text-foreground antialiased;

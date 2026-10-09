@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { ArrowRight, CircleAlert, ShieldCheck, Sun, Volume2 } from 'lucide-react'
-import { ChoiceGroup, type ChoiceOption } from '@/components/student/ChoiceGroup'
+import { ChoiceGroup, type ChoiceOption } from '@/components/common/ChoiceGroup'
 import {
   changeCategory,
   FIELD_ERROR_MESSAGES,

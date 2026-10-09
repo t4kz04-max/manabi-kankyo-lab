@@ -7,8 +7,8 @@ import type { IssueType } from '@/types/issue'
 export const SUGGESTED_ACTIONS: Record<IssueType, string[]> = {
   'chair-noise': [
     '椅子の脚に消音キャップを付ける',
+    '椅子の移動方法を工夫する（持ち上げて静かに動かすよう声をかける）',
     '授業開始前の移動時間に余裕を持たせる',
-    '椅子を持ち上げて動かすよう声かけする',
   ],
   'surrounding-noise': [
     '集中して取り組む時間と話し合う時間を分けて示す',

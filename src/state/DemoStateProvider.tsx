@@ -19,7 +19,7 @@ import {
   saveDemoState,
   type LoadResult,
 } from '@/state/demoStorage'
-import { addIssue } from '@/state/issueActions'
+import { addIssue, updateIssueResponse as applyIssueResponse } from '@/state/issueActions'
 import type { DemoState } from '@/types/issue'
 
 function noticeFromLoad(outcome: LoadResult['outcome']): StorageNotice | null {
@@ -85,6 +85,15 @@ export function DemoStateProvider({ children }: { children: ReactNode }) {
     [commit],
   )
 
+  const updateIssueResponse = useCallback<DemoStateContextValue['updateIssueResponse']>(
+    (issueId, update) => {
+      const result = applyIssueResponse(stateRef.current, issueId, update)
+      if (!result.ok) return result
+      return { ok: true, persisted: commit(result.state) }
+    },
+    [commit],
+  )
+
   const resetDemoState = useCallback(() => {
     const persisted = commit(createInitialDemoState())
     if (persisted) setStorageNotice(null)
@@ -94,8 +103,15 @@ export function DemoStateProvider({ children }: { children: ReactNode }) {
   const dismissStorageNotice = useCallback(() => setStorageNotice(null), [])
 
   const value = useMemo<DemoStateContextValue>(
-    () => ({ state, storageNotice, dismissStorageNotice, submitIssue, resetDemoState }),
-    [state, storageNotice, dismissStorageNotice, submitIssue, resetDemoState],
+    () => ({
+      state,
+      storageNotice,
+      dismissStorageNotice,
+      submitIssue,
+      updateIssueResponse,
+      resetDemoState,
+    }),
+    [state, storageNotice, dismissStorageNotice, submitIssue, updateIssueResponse, resetDemoState],
   )
 
   return <DemoStateContext value={value}>{children}</DemoStateContext>

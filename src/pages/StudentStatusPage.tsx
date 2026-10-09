@@ -1,32 +1,23 @@
 import { useMemo } from 'react'
-import { Info, MessageSquareText, SearchX } from 'lucide-react'
-import { Link, useLocation, useSearchParams } from 'react-router'
+import { Info, MessageSquareText } from 'lucide-react'
+import { Link, useLocation } from 'react-router'
+import { EmptyState } from '@/components/common/EmptyState'
+import { IssueFilters } from '@/components/common/IssueFilters'
 import { PageHeader } from '@/components/common/PageHeader'
-import { ChoiceGroup } from '@/components/student/ChoiceGroup'
 import { IssueStatusCard } from '@/components/student/IssueStatusCard'
 import type { StatusPageLocationState } from '@/components/student/IssueSubmittedStep'
-import {
-  filterIssues,
-  parseCategoryFilter,
-  parseStatusFilter,
-  sortByNewest,
-  type CategoryFilter,
-  type StatusFilter,
-} from '@/components/student/statusFilters'
 import { Button } from '@/components/ui/button'
+import { useIssueFilterParams } from '@/hooks/useIssueFilterParams'
 import { AUDIENCES } from '@/lib/audience'
-import { CATEGORY_LABELS, ISSUE_CATEGORIES, ISSUE_STATUSES, STATUS_LABELS } from '@/lib/labels'
+import { filterIssues, sortByNewest } from '@/lib/issueFilters'
 import { PATHS } from '@/routes/paths'
 import { useDemoState } from '@/state/useDemoState'
 
 export function StudentStatusPage() {
   const { state } = useDemoState()
-  const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const highlightIssueId = (location.state as StatusPageLocationState | null)?.highlightIssueId
-
-  const category = parseCategoryFilter(searchParams.get('category'))
-  const status = parseStatusFilter(searchParams.get('status'))
+  const { category, status, updateFilter, clearFilters } = useIssueFilterParams()
 
   const improvementsById = useMemo(
     () => new Map(state.improvements.map((item) => [item.issueId, item])),
@@ -36,27 +27,6 @@ export function StudentStatusPage() {
     () => sortByNewest(filterIssues(state.issues, category, status)),
     [state.issues, category, status],
   )
-
-  // 絞り込み条件は URL に残し、再読み込みしても保たれるようにする
-  const updateFilter = (key: 'category' | 'status', value: string) => {
-    setSearchParams(
-      (params) => {
-        const next = new URLSearchParams(params)
-        if (value === 'all') next.delete(key)
-        else next.set(key, value)
-        return next
-      },
-      { replace: true, state: location.state },
-    )
-  }
-
-  const categoryOptions = (['all', ...ISSUE_CATEGORIES] as CategoryFilter[]).map((value) => {
-    const count = filterIssues(state.issues, value, 'all').length
-    return {
-      value,
-      label: `${value === 'all' ? 'すべて' : CATEGORY_LABELS[value]}（${count}件）`,
-    }
-  })
 
   return (
     <div className="page-container py-10 sm:py-14">
@@ -80,36 +50,12 @@ export function StudentStatusPage() {
           <span>表示されている投稿や学校からの回答は、すべて架空のデモデータです。</span>
         </p>
 
-        <section aria-label="絞り込み" className="surface-card space-y-5 p-5 sm:p-6">
-          <ChoiceGroup
-            id="filter-category"
-            name="filter-category"
-            legend="カテゴリー"
-            options={categoryOptions}
-            value={category}
-            onChange={(value) => updateFilter('category', value)}
-            columns={3}
-            size="compact"
-          />
-          <div className="space-y-2">
-            <label htmlFor="filter-status" className="block font-bold">
-              対応状況
-            </label>
-            <select
-              id="filter-status"
-              value={status}
-              onChange={(event) => updateFilter('status', event.target.value as StatusFilter)}
-              className="h-12 w-full rounded-xl border-2 border-input bg-card px-3 font-bold sm:w-72"
-            >
-              <option value="all">すべての対応状況</option>
-              {ISSUE_STATUSES.map((value) => (
-                <option key={value} value={value}>
-                  {STATUS_LABELS[value]}
-                </option>
-              ))}
-            </select>
-          </div>
-        </section>
+        <IssueFilters
+          issues={state.issues}
+          category={category}
+          status={status}
+          onChange={updateFilter}
+        />
 
         <section aria-labelledby="results-heading" className="space-y-4">
           <h2 id="results-heading" className="sr-only">
@@ -133,21 +79,15 @@ export function StudentStatusPage() {
               ))}
             </ul>
           ) : (
-            <div className="rounded-2xl border border-dashed border-input/60 bg-card px-5 py-12 text-center">
-              <SearchX aria-hidden="true" className="mx-auto size-10 text-muted-foreground" />
-              <p className="mt-3 font-bold">この条件に当てはまる困りごとはまだありません</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                絞り込みの条件を変えてみてください。
-              </p>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-5"
-                onClick={() => setSearchParams({}, { replace: true, state: location.state })}
-              >
-                絞り込みを解除する
-              </Button>
-            </div>
+            <EmptyState
+              title="この条件に当てはまる困りごとはまだありません"
+              description="絞り込みの条件を変えてみてください。"
+              action={
+                <Button type="button" variant="outline" onClick={clearFilters}>
+                  絞り込みを解除する
+                </Button>
+              }
+            />
           )}
         </section>
       </div>

@@ -60,6 +60,12 @@ export const STATUS_PRESENTATION: Record<IssueStatus, StatusPresentation> = {
   },
 }
 
+/**
+ * 先生ダッシュボードで「対応中」として数える対応状況。
+ * 先生が確認済みで、結論（改善済み・見送り）がまだ出ていないもの。
+ */
+export const IN_PROGRESS_STATUSES: IssueStatus[] = ['considering', 'trial-planned', 'in-trial']
+
 /** トーンごとの配色（文字はすべて背景に対して 4.5:1 以上） */
 export const STATUS_TONE_CLASSES: Record<StatusTone, string> = {
   neutral: 'border-input/60 bg-card text-muted-foreground',

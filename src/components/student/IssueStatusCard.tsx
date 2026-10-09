@@ -25,7 +25,7 @@ export function IssueStatusCard({ issue, improvement, highlighted = false }: Iss
   const responseRows = improvement
     ? [
         { term: '学校からの回答', detail: improvement.teacherResponse },
-        { term: '取り組む内容', detail: improvement.selectedAction ?? '' },
+        { term: '学校としての対応方針', detail: improvement.selectedAction ?? '' },
         { term: '判断の理由', detail: improvement.decisionReason },
         { term: '試した結果', detail: improvement.trialResult },
       ].filter((row) => row.detail.trim() !== '')
