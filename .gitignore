@@ -27,3 +27,7 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# E2E テストの出力
+test-results/
+playwright-report/
