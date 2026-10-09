@@ -79,9 +79,48 @@ export interface NewIssueInput {
   issueType: IssueType
 }
 
+/** 先生が記録する改善記録の文章項目 */
+export type ImprovementRecordField =
+  | 'selectedAction'
+  | 'decisionReason'
+  | 'trialResult'
+  | 'teacherResponse'
+
+/** 生徒が困りごとを投稿した */
+export interface IssueSubmittedActivity {
+  id: string
+  issueId: Issue['id']
+  type: 'issue-submitted'
+  /** ISO 8601 形式の日時 */
+  occurredAt: string
+  isDemo: boolean
+}
+
+/**
+ * 先生が対応状況・改善記録を保存した（保存1回につき1件）。
+ * 変更があった項目だけを、その時点の値で記録する。後から編集しても過去の記録は書き換えない。
+ */
+export interface ResponseUpdatedActivity {
+  id: string
+  issueId: Issue['id']
+  type: 'response-updated'
+  /** ISO 8601 形式の日時 */
+  occurredAt: string
+  /** 対応状況を変更した場合だけ記録する */
+  statusChange: { from: IssueStatus; to: IssueStatus } | null
+  /** 内容を変更した記録項目と、変更後の値（空文字は削除を表す） */
+  recordChanges: { field: ImprovementRecordField; value: string }[]
+  isDemo: boolean
+}
+
+/** 対応履歴のイベント */
+export type ActivityEvent = IssueSubmittedActivity | ResponseUpdatedActivity
+
 /** localStorage に保存するデモ状態全体 */
 export interface DemoState {
   version: number
   issues: Issue[]
   improvements: Improvement[]
+  /** 対応履歴（Phase 4 で追加。それ以前の操作の履歴は存在しない） */
+  activities: ActivityEvent[]
 }

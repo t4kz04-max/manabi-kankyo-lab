@@ -6,7 +6,8 @@
 import { SUGGESTED_ACTIONS } from '@/data/suggestedActions'
 import type { DemoState, Improvement, Issue } from '@/types/issue'
 
-export const DEMO_STATE_VERSION = 1
+/** v2: 対応履歴（activities）を追加 */
+export const DEMO_STATE_VERSION = 2
 
 export const DEMO_DATA_NOTICE =
   'このアプリに表示される投稿・対応・結果は、すべて架空のデモデータです。'
@@ -129,7 +130,17 @@ export const DEMO_IMPROVEMENTS: Improvement[] = [
   },
 ]
 
-/** リセット時に使う初期デモ状態を新しく生成する */
+/**
+ * 改善レポートで、投稿の指定がなく対応履歴もまだない場合に表示する投稿。
+ * 対応内容と試行結果がそろった架空のデモ例（実際の学校の成果ではない）。
+ */
+export const REPORT_DEFAULT_ISSUE_ID = 'demo-issue-004'
+
+/**
+ * リセット時に使う初期デモ状態を新しく生成する。
+ * 初期デモデータには操作の履歴がないため、対応履歴（activities）は空で始める。
+ * 過去の変更日時や順序を推測した履歴は作らない。
+ */
 export function createInitialDemoState(): DemoState {
   return {
     version: DEMO_STATE_VERSION,
@@ -138,5 +149,6 @@ export function createInitialDemoState(): DemoState {
       ...improvement,
       suggestedActions: [...improvement.suggestedActions],
     })),
+    activities: [],
   }
 }

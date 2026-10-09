@@ -1,11 +1,11 @@
-import { ArrowRight, Eye, Sun, Volume2 } from 'lucide-react'
+import { ArrowRight, Eye, FileChartColumn, Sun, Volume2 } from 'lucide-react'
 import { Link } from 'react-router'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/format'
 import { CATEGORY_LABELS, describeIssue, SITUATION_LABELS } from '@/lib/labels'
 import { cn } from '@/lib/utils'
-import { teacherIssuePath } from '@/routes/paths'
+import { reportPath, teacherIssuePath } from '@/routes/paths'
 import type { Issue } from '@/types/issue'
 
 interface TeacherIssueRowProps {
@@ -48,25 +48,33 @@ export function TeacherIssueRow({ issue }: TeacherIssueRowProps) {
           場面：<span className="font-bold text-foreground">{SITUATION_LABELS[issue.situation]}</span>
         </p>
       </div>
-      <Button
-        asChild
-        variant={isUnconfirmed ? 'default' : 'outline'}
-        className="w-full shrink-0 md:w-auto"
-      >
-        <Link to={teacherIssuePath(issue.id)} aria-describedby={titleId}>
-          {isUnconfirmed ? (
-            <>
-              対応を考える
-              <ArrowRight aria-hidden="true" data-icon="inline-end" />
-            </>
-          ) : (
-            <>
-              <Eye aria-hidden="true" data-icon="inline-start" />
-              対応内容を見る
-            </>
-          )}
-        </Link>
-      </Button>
+      <div className="flex shrink-0 flex-col gap-2 sm:flex-row md:flex-col lg:flex-row">
+        <Button asChild variant="ghost" className="w-full sm:w-auto">
+          <Link to={reportPath(issue.id)} aria-describedby={titleId}>
+            <FileChartColumn aria-hidden="true" data-icon="inline-start" />
+            レポート
+          </Link>
+        </Button>
+        <Button
+          asChild
+          variant={isUnconfirmed ? 'default' : 'outline'}
+          className="w-full sm:w-auto"
+        >
+          <Link to={teacherIssuePath(issue.id)} aria-describedby={titleId}>
+            {isUnconfirmed ? (
+              <>
+                対応を考える
+                <ArrowRight aria-hidden="true" data-icon="inline-end" />
+              </>
+            ) : (
+              <>
+                <Eye aria-hidden="true" data-icon="inline-start" />
+                対応内容を見る
+              </>
+            )}
+          </Link>
+        </Button>
+      </div>
     </article>
   )
 }

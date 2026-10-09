@@ -11,3 +11,8 @@ export const PATHS = {
 export function teacherIssuePath(issueId: string): string {
   return PATHS.teacherIssue.replace(':issueId', encodeURIComponent(issueId))
 }
+
+/** 指定した投稿の改善レポートのURL */
+export function reportPath(issueId: string): string {
+  return `${PATHS.report}?${new URLSearchParams({ issueId }).toString()}`
+}

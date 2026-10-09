@@ -18,13 +18,16 @@ export interface SubmitIssueResult {
 export type UpdateIssueResponseResult =
   | {
       ok: true
-      /** localStorage への保存に成功したか（失敗時はこのタブのメモリ上にだけ反映される） */
-      persisted: boolean
+      /** 保存済みの内容から変更があったか（false の場合は何も保存していない） */
+      changed: boolean
     }
   | {
       ok: false
-      /** not-found：投稿が存在しない／invalid：入力内容が正しくない */
-      reason: 'not-found' | 'invalid'
+      /**
+       * not-found：投稿が存在しない／invalid：入力内容が正しくない／
+       * save-failed：ブラウザに保存できなかった（変更は反映していない）
+       */
+      reason: 'not-found' | 'invalid' | 'save-failed'
     }
 
 export interface DemoStateContextValue {

@@ -1,5 +1,5 @@
 import { ISSUE_STATUSES } from '@/lib/labels'
-import type { IssueStatus } from '@/types/issue'
+import type { ImprovementRecordField, IssueStatus } from '@/types/issue'
 
 /**
  * 先生が記録する文章項目。
@@ -9,11 +9,7 @@ import type { IssueStatus } from '@/types/issue'
  *   trialResult     : 試した結果
  *   teacherResponse : 生徒へのメッセージ（任意）
  */
-export type ImprovementTextField =
-  | 'selectedAction'
-  | 'decisionReason'
-  | 'trialResult'
-  | 'teacherResponse'
+export type ImprovementTextField = ImprovementRecordField
 
 export const IMPROVEMENT_TEXT_FIELDS: ImprovementTextField[] = [
   'selectedAction',

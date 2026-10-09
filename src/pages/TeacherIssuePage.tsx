@@ -1,4 +1,4 @@
-import { ArrowLeft, FileQuestion } from 'lucide-react'
+import { ArrowLeft, FileChartColumn, FileQuestion } from 'lucide-react'
 import { Link, useParams } from 'react-router'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeader } from '@/components/common/PageHeader'
@@ -7,7 +7,7 @@ import { ImprovementEditor } from '@/components/teacher/ImprovementEditor'
 import { IssueOverviewCard } from '@/components/teacher/IssueOverviewCard'
 import { Button } from '@/components/ui/button'
 import { AUDIENCES } from '@/lib/audience'
-import { PATHS } from '@/routes/paths'
+import { PATHS, reportPath } from '@/routes/paths'
 import { findImprovement, findIssue } from '@/state/issueActions'
 import { useDemoState } from '@/state/useDemoState'
 
@@ -20,13 +20,24 @@ export function TeacherIssuePage() {
   return (
     <div className="page-container py-8 sm:py-12">
       <div className="mx-auto max-w-6xl space-y-6">
-        <Link
-          to={PATHS.teacherDashboard}
-          className="inline-flex min-h-10 items-center gap-1.5 rounded-lg text-sm font-bold text-primary-ink hover:underline"
-        >
-          <ArrowLeft aria-hidden="true" className="size-4" />
-          ダッシュボードに戻る
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <Link
+            to={PATHS.teacherDashboard}
+            className="inline-flex min-h-10 items-center gap-1.5 rounded-lg text-sm font-bold text-primary-ink hover:underline"
+          >
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            ダッシュボードに戻る
+          </Link>
+          {issue && (
+            <Link
+              to={reportPath(issue.id)}
+              className="inline-flex min-h-10 items-center gap-1.5 rounded-lg text-sm font-bold text-primary-ink hover:underline"
+            >
+              <FileChartColumn aria-hidden="true" className="size-4" />
+              この困りごとの改善レポート
+            </Link>
+          )}
+        </div>
 
         <div className="space-y-4">
           <PageHeader

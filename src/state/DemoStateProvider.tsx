@@ -89,9 +89,13 @@ export function DemoStateProvider({ children }: { children: ReactNode }) {
     (issueId, update) => {
       const result = applyIssueResponse(stateRef.current, issueId, update)
       if (!result.ok) return result
-      return { ok: true, persisted: commit(result.state) }
+      if (!result.changed) return { ok: true, changed: false }
+      // 保存できなかった変更は画面にも反映しない（保存されていない履歴を表示しないため）
+      if (!saveDemoState(result.state)) return { ok: false, reason: 'save-failed' }
+      replaceState(result.state)
+      return { ok: true, changed: true }
     },
-    [commit],
+    [replaceState],
   )
 
   const resetDemoState = useCallback(() => {

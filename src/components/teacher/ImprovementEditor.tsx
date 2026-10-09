@@ -33,7 +33,7 @@ import {
 import { ISSUE_STATUSES } from '@/lib/labels'
 import { STATUS_PRESENTATION } from '@/lib/status'
 import { cn } from '@/lib/utils'
-import { PATHS } from '@/routes/paths'
+import { PATHS, reportPath } from '@/routes/paths'
 import { useDemoState } from '@/state/useDemoState'
 import type { Improvement, Issue, IssueStatus } from '@/types/issue'
 
@@ -52,7 +52,7 @@ const FIELD_HINTS: Record<ImprovementTextField, string> = {
 }
 
 type SaveResult =
-  | { kind: 'saved'; persisted: boolean }
+  | { kind: 'saved'; changed: boolean }
   | { kind: 'error'; message: string }
 
 interface ImprovementEditorProps {
@@ -104,16 +104,18 @@ export function ImprovementEditor({ issue, improvement }: ImprovementEditorProps
     if (!result.ok) {
       setSaveResult({
         kind: 'error',
-        message:
-          result.reason === 'not-found'
-            ? '対象の困りごとが見つからないため、保存できませんでした。'
-            : '入力内容に誤りがあるため、保存できませんでした。',
+        message: {
+          'not-found': '対象の困りごとが見つからないため、保存できませんでした。',
+          invalid: '入力内容に誤りがあるため、保存できませんでした。',
+          'save-failed':
+            'ブラウザに保存できなかったため、変更は反映されていません。入力内容はこの画面に残っています。',
+        }[result.reason],
       })
       return
     }
     setDraft(normalizeDraft(draft))
     setShowErrors(false)
-    setSaveResult({ kind: 'saved', persisted: result.persisted })
+    setSaveResult({ kind: 'saved', changed: result.changed })
   }
 
   const handleDiscard = () => {
@@ -230,6 +232,7 @@ export function ImprovementEditor({ issue, improvement }: ImprovementEditorProps
             保存すると、生徒の「対応状況を見る」画面にこのように表示されます。
           </p>
           <IssueStatusCard
+            showReportLink={false}
             issue={{ ...issue, status: preview.status }}
             improvement={{
               issueId: issue.id,
@@ -249,7 +252,7 @@ export function ImprovementEditor({ issue, improvement }: ImprovementEditorProps
       <div className="sticky bottom-0 z-20 -mx-4 border-t border-border bg-card/95 px-4 py-3 shadow-raised backdrop-blur sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div role="status" aria-live="polite" className="min-w-0 text-sm font-bold">
-            <SaveStatus isDirty={isDirty} saveResult={saveResult} studentLinkState={studentLinkState} />
+            <SaveStatus issueId={issue.id} isDirty={isDirty} saveResult={saveResult} studentLinkState={studentLinkState} />
           </div>
           <div className="flex shrink-0 gap-2">
             <Button
@@ -292,12 +295,13 @@ function EditorSection({ step, title, children }: { step: number; title: string;
 }
 
 interface SaveStatusProps {
+  issueId: string
   isDirty: boolean
   saveResult: SaveResult | null
   studentLinkState: StatusPageLocationState
 }
 
-function SaveStatus({ isDirty, saveResult, studentLinkState }: SaveStatusProps) {
+function SaveStatus({ issueId, isDirty, saveResult, studentLinkState }: SaveStatusProps) {
   if (saveResult?.kind === 'error') {
     return (
       <p className="flex items-start gap-1.5 text-destructive">
@@ -320,17 +324,13 @@ function SaveStatus({ isDirty, saveResult, studentLinkState }: SaveStatusProps) 
         <p
           className={cn(
             'flex items-start gap-1.5',
-            saveResult.persisted ? 'text-success-ink' : 'text-destructive',
+            saveResult.changed ? 'text-success-ink' : 'text-muted-foreground',
           )}
         >
-          {saveResult.persisted ? (
-            <CircleCheckBig aria-hidden="true" className="mt-[0.25em] size-4 shrink-0" />
-          ) : (
-            <CircleAlert aria-hidden="true" className="mt-[0.25em] size-4 shrink-0" />
-          )}
-          {saveResult.persisted
-            ? '保存しました。生徒の対応状況一覧に反映されています。'
-            : 'この画面には反映しましたが、ブラウザに保存できませんでした。再読み込みすると消えます。'}
+          <CircleCheckBig aria-hidden="true" className="mt-[0.25em] size-4 shrink-0" />
+          {saveResult.changed
+            ? '保存しました。生徒の対応状況一覧と改善レポートに反映されています。'
+            : '保存済みの内容から変更がないため、保存する内容はありませんでした。'}
         </p>
         <Link
           to={PATHS.studentStatus}
@@ -338,6 +338,10 @@ function SaveStatus({ isDirty, saveResult, studentLinkState }: SaveStatusProps) 
           className="inline-flex items-center gap-1 text-link"
         >
           生徒の画面で確認する
+          <ExternalLink aria-hidden="true" className="size-3.5" />
+        </Link>
+        <Link to={reportPath(issueId)} className="inline-flex items-center gap-1 text-link">
+          改善レポートを見る
           <ExternalLink aria-hidden="true" className="size-3.5" />
         </Link>
       </div>

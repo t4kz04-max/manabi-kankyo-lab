@@ -1,4 +1,5 @@
-import { MessageCircleReply, Sparkles, Sun, Volume2 } from 'lucide-react'
+import { FileChartColumn, MessageCircleReply, Sparkles, Sun, Volume2 } from 'lucide-react'
+import { Link } from 'react-router'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { formatDate } from '@/lib/format'
 import {
@@ -9,6 +10,7 @@ import {
 } from '@/lib/labels'
 import { STATUS_PRESENTATION } from '@/lib/status'
 import { cn } from '@/lib/utils'
+import { reportPath } from '@/routes/paths'
 import type { Improvement, Issue } from '@/types/issue'
 
 interface IssueStatusCardProps {
@@ -16,9 +18,16 @@ interface IssueStatusCardProps {
   improvement?: Improvement
   /** 直前に投稿した困りごとを目立たせる */
   highlighted?: boolean
+  /** 改善レポートへのリンクを表示するか（先生画面のプレビューでは表示しない） */
+  showReportLink?: boolean
 }
 
-export function IssueStatusCard({ issue, improvement, highlighted = false }: IssueStatusCardProps) {
+export function IssueStatusCard({
+  issue,
+  improvement,
+  highlighted = false,
+  showReportLink = true,
+}: IssueStatusCardProps) {
   const CategoryIcon = issue.category === 'sound' ? Volume2 : Sun
   const titleId = `issue-${issue.id}-title`
   // 先生が実際に記録した内容だけを表示する（空の項目は表示しない）
@@ -94,6 +103,16 @@ export function IssueStatusCard({ issue, improvement, highlighted = false }: Iss
           </p>
         )}
       </div>
+      {showReportLink && (
+        <Link
+          to={reportPath(issue.id)}
+          aria-describedby={titleId}
+          className="mt-3 inline-flex min-h-10 items-center gap-1.5 text-sm text-link"
+        >
+          <FileChartColumn aria-hidden="true" className="size-4" />
+          改善レポートを見る
+        </Link>
+      )}
     </article>
   )
 }

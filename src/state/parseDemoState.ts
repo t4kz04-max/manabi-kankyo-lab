@@ -5,7 +5,8 @@ import {
   ISSUE_TYPES,
   ISSUE_TYPES_BY_CATEGORY,
 } from '@/lib/labels'
-import type { DemoState, Improvement, Issue } from '@/types/issue'
+import { IMPROVEMENT_TEXT_FIELDS } from '@/lib/improvementRules'
+import type { ActivityEvent, DemoState, Improvement, Issue } from '@/types/issue'
 
 type UnknownRecord = Record<string, unknown>
 
@@ -53,6 +54,34 @@ function isImprovement(value: unknown): value is Improvement {
   )
 }
 
+function isActivity(value: unknown): value is ActivityEvent {
+  if (!isRecord(value)) return false
+  const base =
+    isString(value.id) &&
+    value.id.length > 0 &&
+    isString(value.issueId) &&
+    isDateString(value.occurredAt) &&
+    typeof value.isDemo === 'boolean'
+  if (!base) return false
+  if (value.type === 'issue-submitted') return true
+  if (value.type !== 'response-updated') return false
+  const { statusChange, recordChanges } = value
+  const validStatusChange =
+    statusChange === null ||
+    (isRecord(statusChange) &&
+      isOneOf(ISSUE_STATUSES, statusChange.from) &&
+      isOneOf(ISSUE_STATUSES, statusChange.to))
+  const validRecordChanges =
+    Array.isArray(recordChanges) &&
+    recordChanges.every(
+      (change) =>
+        isRecord(change) &&
+        isOneOf(IMPROVEMENT_TEXT_FIELDS, change.field) &&
+        isString(change.value),
+    )
+  return validStatusChange && validRecordChanges
+}
+
 export type ParseResult =
   | { ok: true; state: DemoState }
   | { ok: false; reason: 'invalid' | 'version-mismatch' }
@@ -72,26 +101,31 @@ export function parseDemoState(value: unknown, expectedVersion: number): ParseRe
   if (value.version !== expectedVersion) {
     return { ok: false, reason: 'version-mismatch' }
   }
-  const { issues, improvements } = value
+  const { issues, improvements, activities } = value
   if (
     !Array.isArray(issues) ||
     !issues.every(isIssue) ||
     !Array.isArray(improvements) ||
-    !improvements.every(isImprovement)
+    !improvements.every(isImprovement) ||
+    !Array.isArray(activities) ||
+    !activities.every(isActivity)
   ) {
     return { ok: false, reason: 'invalid' }
   }
 
-  // ID の重複や、存在しない投稿を参照する改善記録があれば破損とみなす
+  // ID の重複や、存在しない投稿を参照する改善記録・履歴があれば破損とみなす
   const issueIds = new Set(issues.map((issue) => issue.id))
   const improvementIds = new Set(improvements.map((item) => item.issueId))
+  const activityIds = new Set(activities.map((item) => item.id))
   if (
     issueIds.size !== issues.length ||
     improvementIds.size !== improvements.length ||
-    improvements.some((item) => !issueIds.has(item.issueId))
+    improvements.some((item) => !issueIds.has(item.issueId)) ||
+    activityIds.size !== activities.length ||
+    activities.some((item) => !issueIds.has(item.issueId))
   ) {
     return { ok: false, reason: 'invalid' }
   }
 
-  return { ok: true, state: { version: value.version, issues, improvements } }
+  return { ok: true, state: { version: value.version, issues, improvements, activities } }
 }
