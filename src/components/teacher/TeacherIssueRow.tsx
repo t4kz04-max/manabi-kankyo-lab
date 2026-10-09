@@ -22,7 +22,7 @@ export function TeacherIssueRow({ issue }: TeacherIssueRowProps) {
     <article
       aria-labelledby={titleId}
       className={cn(
-        'surface-card relative flex flex-col gap-4 overflow-hidden p-5 sm:p-6 md:flex-row md:items-center',
+        'surface-card relative flex flex-col gap-4 overflow-hidden p-5 transition-shadow hover:shadow-raised sm:p-6 md:flex-row md:items-center',
         isUnconfirmed && 'pl-6 sm:pl-7',
       )}
     >

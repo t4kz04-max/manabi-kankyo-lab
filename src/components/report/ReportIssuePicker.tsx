@@ -13,15 +13,15 @@ interface ReportIssuePickerProps {
 /** レポートを表示する困りごとの切り替え */
 export function ReportIssuePicker({ issues, value, onChange }: ReportIssuePickerProps) {
   return (
-    <div className="surface-card space-y-2 p-5 sm:p-6">
-      <label htmlFor="report-issue" className="block font-bold">
+    <div className="surface-card flex flex-col gap-2 px-5 py-4 sm:flex-row sm:items-center sm:gap-4 sm:px-6">
+      <label htmlFor="report-issue" className="shrink-0 font-bold">
         表示する困りごと
       </label>
       <select
         id="report-issue"
         value={value}
         onChange={(event) => onChange(event.target.value)}
-        className="h-12 w-full rounded-xl border-2 border-input bg-card px-3 font-bold transition-colors hover:border-primary/60"
+        className="h-12 w-full min-w-0 rounded-xl border-2 border-input bg-card px-3 font-bold transition-colors hover:border-primary/60"
       >
         {value === '' && <option value="">選んでください</option>}
         {sortByNewest(issues).map((issue) => (

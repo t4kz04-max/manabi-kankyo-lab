@@ -48,13 +48,15 @@ export function DemoStateProvider({ children }: { children: ReactNode }) {
     setState(next)
   }, [])
 
-  /** 状態を更新して保存する。保存に失敗した場合はお知らせを表示する */
-  const commit = useCallback(
+  /**
+   * 変更を保存し、保存に成功した場合だけ状態に反映する。
+   * 保存できなかった変更（投稿・対応・履歴・リセット）は確定済みのデータとして扱わない。
+   */
+  const persist = useCallback(
     (next: DemoState) => {
+      if (!saveDemoState(next)) return false
       replaceState(next)
-      const persisted = saveDemoState(next)
-      if (!persisted) setStorageNotice('save-failed')
-      return persisted
+      return true
     },
     [replaceState],
   )
@@ -80,9 +82,9 @@ export function DemoStateProvider({ children }: { children: ReactNode }) {
   const submitIssue = useCallback<DemoStateContextValue['submitIssue']>(
     (input) => {
       const { state: next, issue } = addIssue(stateRef.current, input)
-      return { issue, persisted: commit(next) }
+      return persist(next) ? { ok: true, issue } : { ok: false, reason: 'save-failed' }
     },
-    [commit],
+    [persist],
   )
 
   const updateIssueResponse = useCallback<DemoStateContextValue['updateIssueResponse']>(
@@ -90,19 +92,17 @@ export function DemoStateProvider({ children }: { children: ReactNode }) {
       const result = applyIssueResponse(stateRef.current, issueId, update)
       if (!result.ok) return result
       if (!result.changed) return { ok: true, changed: false }
-      // 保存できなかった変更は画面にも反映しない（保存されていない履歴を表示しないため）
-      if (!saveDemoState(result.state)) return { ok: false, reason: 'save-failed' }
-      replaceState(result.state)
+      if (!persist(result.state)) return { ok: false, reason: 'save-failed' }
       return { ok: true, changed: true }
     },
-    [replaceState],
+    [persist],
   )
 
-  const resetDemoState = useCallback(() => {
-    const persisted = commit(createInitialDemoState())
-    if (persisted) setStorageNotice(null)
-    return { persisted }
-  }, [commit])
+  const resetDemoState = useCallback<DemoStateContextValue['resetDemoState']>(() => {
+    if (!persist(createInitialDemoState())) return { ok: false, reason: 'save-failed' }
+    setStorageNotice(null)
+    return { ok: true }
+  }, [persist])
 
   const dismissStorageNotice = useCallback(() => setStorageNotice(null), [])
 

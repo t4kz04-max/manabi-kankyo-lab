@@ -7,7 +7,7 @@ export function TeacherDemoNote() {
       <Info aria-hidden="true" className="mt-[0.3em] size-4 shrink-0 text-pending-ink" />
       <span>
         <strong className="font-bold">先生モードはデモ用です。</strong>
-        実際のログイン・権限管理はありません。表示される投稿と対応はすべて架空のデータです。
+        実際のログイン・権限管理はなく、表示される内容はすべて架空のデータです。
       </span>
     </p>
   )

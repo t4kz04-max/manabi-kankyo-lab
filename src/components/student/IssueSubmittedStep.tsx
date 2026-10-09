@@ -1,4 +1,4 @@
-import { CircleAlert, CircleCheckBig, ListChecks, Plus } from 'lucide-react'
+import { CircleCheckBig, ListChecks, Plus } from 'lucide-react'
 import { Link } from 'react-router'
 import { StatusBadge } from '@/components/common/StatusBadge'
 import { Button } from '@/components/ui/button'
@@ -12,11 +12,10 @@ export interface StatusPageLocationState {
 
 interface IssueSubmittedStepProps {
   issue: Issue
-  persisted: boolean
   onSubmitAnother: () => void
 }
 
-export function IssueSubmittedStep({ issue, persisted, onSubmitAnother }: IssueSubmittedStepProps) {
+export function IssueSubmittedStep({ issue, onSubmitAnother }: IssueSubmittedStepProps) {
   const linkState: StatusPageLocationState = { highlightIssueId: issue.id }
 
   return (
@@ -38,18 +37,9 @@ export function IssueSubmittedStep({ issue, persisted, onSubmitAnother }: IssueS
         </p>
       </div>
 
-      {persisted ? (
-        <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground sm:text-base">
-          これはデモアプリ内での受付です。投稿はこのブラウザの中にだけ保存され、実際の学校には送信されていません。
-        </p>
-      ) : (
-        <p className="flex gap-2 rounded-xl border border-destructive/40 bg-destructive/5 px-4 py-3 text-sm font-medium sm:text-base">
-          <CircleAlert aria-hidden="true" className="mt-[0.3em] size-4 shrink-0 text-destructive" />
-          <span>
-            このブラウザに保存できなかったため、投稿はこの画面を開いている間だけ表示されます。再読み込みすると消えます。（デモアプリ内での受付で、実際の学校には送信されていません）
-          </span>
-        </p>
-      )}
+      <p className="rounded-xl bg-muted px-4 py-3 text-sm text-muted-foreground sm:text-base">
+        これはデモアプリ内での受付です。投稿はこのブラウザの中にだけ保存され、実際の学校には送信されていません。
+      </p>
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <Button asChild size="lg" className="w-full sm:w-auto">

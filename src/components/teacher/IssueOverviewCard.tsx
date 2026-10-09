@@ -34,7 +34,7 @@ export function IssueOverviewCard({ issue }: IssueOverviewCardProps) {
           <StatusBadge status={issue.status} />
         </div>
       </div>
-      <dl className="grid gap-x-6 gap-y-3 px-5 py-5 sm:grid-cols-2 sm:px-7 lg:grid-cols-4">
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 px-5 py-5 sm:px-7 lg:grid-cols-4">
         {rows.map((row) => (
           <div key={row.term}>
             <dt className="text-xs font-bold text-muted-foreground">{row.term}</dt>

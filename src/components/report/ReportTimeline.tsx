@@ -8,7 +8,7 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { StatusBadge } from '@/components/common/StatusBadge'
-import { formatDateTime } from '@/lib/format'
+import { formatDateTime, formatDateTimeWithSeconds, minuteKey } from '@/lib/format'
 import { IMPROVEMENT_FIELD_LABELS } from '@/lib/improvementRules'
 import { describeIssue, STATUS_LABELS } from '@/lib/labels'
 import type { TimelineEntry } from '@/lib/reportTimeline'
@@ -21,19 +21,38 @@ interface ReportTimelineProps {
   entries: TimelineEntry[]
 }
 
-/** 改善までの流れ（記録されている出来事だけを古い順に表示する） */
+function entryTime(entry: TimelineEntry): string | undefined {
+  if (entry.kind === 'submitted') return entry.occurredAt
+  if (entry.kind === 'response') return entry.activity.occurredAt
+  return undefined
+}
+
+/**
+ * 改善までの流れ（記録されている出来事だけを古い順に表示する）。
+ * 続けて操作すると同じ「分」の記録が並ぶため、順番を「1件目」「2件目」と示し、
+ * 同じ分の記録があるときだけ秒まで表示する（日時そのものは加工しない）。
+ */
 export function ReportTimeline({ issue, entries }: ReportTimelineProps) {
+  const minuteCounts = new Map<string, number>()
+  for (const entry of entries) {
+    const time = entryTime(entry)
+    if (time) minuteCounts.set(minuteKey(time), (minuteCounts.get(minuteKey(time)) ?? 0) + 1)
+  }
+  const showSeconds = (time: string) => (minuteCounts.get(minuteKey(time)) ?? 0) > 1
+
   return (
     <div className="relative">
       {/* 縦線（装飾） */}
       <span aria-hidden="true" className="absolute top-4 bottom-4 left-[1.1875rem] w-0.5 bg-border" />
       <ol className="relative space-y-6">
-        {entries.map((entry) => {
+        {entries.map((entry, index) => {
+          const common = { order: index + 1, showSeconds }
           switch (entry.kind) {
             case 'submitted':
               return (
                 <TimelineItem
                   key="submitted"
+                  {...common}
                   icon={MessageSquareText}
                   iconClass="bg-primary text-primary-foreground"
                   title="生徒が困りごとを投稿"
@@ -50,6 +69,7 @@ export function ReportTimeline({ issue, entries }: ReportTimelineProps) {
               return (
                 <TimelineItem
                   key="pre-history"
+                  {...common}
                   icon={Hourglass}
                   iconClass="bg-muted text-muted-foreground ring-1 ring-border"
                   title="履歴の記録を始める前の状態"
@@ -60,12 +80,12 @@ export function ReportTimeline({ issue, entries }: ReportTimelineProps) {
                     <StatusBadge status={entry.status} />
                   </p>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    架空の初期デモデータのため、投稿後に対応状況がいつ・どの順に変わったかは記録されていません。
+                    架空の初期デモデータのため、それまでの変更の日時や順序は記録されていません。
                   </p>
                 </TimelineItem>
               )
             case 'response':
-              return <ResponseItem key={entry.activity.id} activity={entry.activity} />
+              return <ResponseItem key={entry.activity.id} {...common} activity={entry.activity} />
           }
         })}
       </ol>
@@ -73,7 +93,13 @@ export function ReportTimeline({ issue, entries }: ReportTimelineProps) {
   )
 }
 
-function ResponseItem({ activity }: { activity: ResponseUpdatedActivity }) {
+interface ResponseItemProps {
+  activity: ResponseUpdatedActivity
+  order: number
+  showSeconds: (time: string) => boolean
+}
+
+function ResponseItem({ activity, order, showSeconds }: ResponseItemProps) {
   const { statusChange, recordChanges } = activity
   const sharesResult = recordChanges.some(
     (change) => change.field === 'trialResult' && change.value !== '',
@@ -88,6 +114,8 @@ function ResponseItem({ activity }: { activity: ResponseUpdatedActivity }) {
 
   return (
     <TimelineItem
+      order={order}
+      showSeconds={showSeconds}
       icon={icon}
       iconClass={iconClass}
       title={
@@ -133,6 +161,9 @@ function ResponseItem({ activity }: { activity: ResponseUpdatedActivity }) {
 }
 
 interface TimelineItemProps {
+  /** 古い順の番号（1 始まり） */
+  order: number
+  showSeconds: (time: string) => boolean
   icon: LucideIcon
   iconClass: string
   title: string
@@ -143,22 +174,41 @@ interface TimelineItemProps {
   children: ReactNode
 }
 
-function TimelineItem({ icon: Icon, iconClass, title, time, timeLabel, tag, children }: TimelineItemProps) {
+function TimelineItem({
+  order,
+  showSeconds,
+  icon: Icon,
+  iconClass,
+  title,
+  time,
+  timeLabel,
+  tag,
+  children,
+}: TimelineItemProps) {
   return (
-    <li className="relative flex gap-4">
+    <li className="relative flex gap-4 animate-in fade-in-0 duration-300">
       <span
         className={cn('relative z-10 flex size-10 shrink-0 items-center justify-center rounded-full', iconClass)}
       >
         <Icon aria-hidden="true" className="size-5" />
       </span>
-      <div className="min-w-0 flex-1 pt-1.5">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+      <div className="min-w-0 flex-1 pt-1">
+        <p className="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
+          <span className="rounded-md bg-muted px-1.5 py-0.5 text-xs font-bold text-foreground">
+            {order}件目
+          </span>
+          {time ? (
+            <time dateTime={time}>
+              {showSeconds(time) ? formatDateTimeWithSeconds(time) : formatDateTime(time)}
+            </time>
+          ) : (
+            timeLabel
+          )}
+        </p>
+        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
           <h3 className="text-base sm:text-lg">{title}</h3>
           {tag}
         </div>
-        <p className="text-sm text-muted-foreground">
-          {time ? <time dateTime={time}>{formatDateTime(time)}</time> : timeLabel}
-        </p>
         <div className="mt-3">{children}</div>
       </div>
     </li>

@@ -1,13 +1,12 @@
 import { useMemo } from 'react'
-import { ClipboardList, FileQuestion, Flag, Inbox, Info, Route } from 'lucide-react'
+import { ClipboardList, FileQuestion, Inbox, Info, Route } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router'
 import { EmptyState } from '@/components/common/EmptyState'
 import { PageHeader } from '@/components/common/PageHeader'
 import { ReportIssuePicker } from '@/components/report/ReportIssuePicker'
-import { ReportOverview } from '@/components/report/ReportOverview'
 import { ReportResponseDetails } from '@/components/report/ReportResponseDetails'
-import { ReportResult } from '@/components/report/ReportResult'
 import { ReportSection } from '@/components/report/ReportSection'
+import { ReportSummary } from '@/components/report/ReportSummary'
 import { ReportTimeline } from '@/components/report/ReportTimeline'
 import { Button } from '@/components/ui/button'
 import { REPORT_DEFAULT_ISSUE_ID } from '@/data/demoData'
@@ -59,7 +58,7 @@ export function ReportPage() {
         />
         <p className="flex gap-2 text-sm text-muted-foreground">
           <Info aria-hidden="true" className="mt-[0.3em] size-4 shrink-0 text-primary" />
-          <span>このレポートの投稿・対応・結果は、すべて架空のデモデータです。実際の学校の成果ではありません。</span>
+          <span>表示される内容はすべて架空のデモデータで、実際の学校の成果ではありません。</span>
         </p>
 
         {state.issues.length === 0 ? (
@@ -88,29 +87,24 @@ export function ReportPage() {
 
             {issue ? (
               <>
-                <ReportOverview issue={issue} />
+                <ReportSummary issue={issue} improvement={improvement} />
                 <div className="grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:items-start">
                   <ReportSection
                     id="report-timeline-heading"
                     title="改善までの流れ"
                     icon={Route}
-                    lead="実際に記録された出来事だけを、古い順に表示しています。"
+                    lead="記録された出来事だけを、古い順に表示しています。"
                   >
                     <ReportTimeline issue={issue} entries={timeline} />
                   </ReportSection>
-                  <div className="space-y-6">
-                    <ReportSection id="report-result-heading" title="現在の結果" icon={Flag}>
-                      <ReportResult issue={issue} improvement={improvement} />
-                    </ReportSection>
-                    <ReportSection
-                      id="report-response-heading"
-                      title="学校の対応内容"
-                      icon={ClipboardList}
-                      lead="現在保存されている記録です。"
-                    >
-                      <ReportResponseDetails improvement={improvement} />
-                    </ReportSection>
-                  </div>
+                  <ReportSection
+                    id="report-response-heading"
+                    title="学校の対応内容"
+                    icon={ClipboardList}
+                    lead="現在保存されている記録の全文です。"
+                  >
+                    <ReportResponseDetails improvement={improvement} />
+                  </ReportSection>
                 </div>
               </>
             ) : (

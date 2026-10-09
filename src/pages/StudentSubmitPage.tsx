@@ -6,8 +6,8 @@ import { IssueInputStep } from '@/components/student/IssueInputStep'
 import { IssueSubmittedStep } from '@/components/student/IssueSubmittedStep'
 import { EMPTY_DRAFT, toIssueInput, type IssueDraft } from '@/components/student/issueDraft'
 import { AUDIENCES } from '@/lib/audience'
-import type { SubmitIssueResult } from '@/state/demoStateContext'
 import { useDemoState } from '@/state/useDemoState'
+import type { Issue } from '@/types/issue'
 
 type Step = 'input' | 'confirm' | 'done'
 
@@ -23,7 +23,8 @@ export function StudentSubmitPage() {
   const { submitIssue } = useDemoState()
   const [step, setStep] = useState<Step>('input')
   const [draft, setDraft] = useState<IssueDraft>(EMPTY_DRAFT)
-  const [result, setResult] = useState<SubmitIssueResult | null>(null)
+  const [submittedIssue, setSubmittedIssue] = useState<Issue | null>(null)
+  const [failedAttempts, setFailedAttempts] = useState(0)
   const headingRef = useRef<HTMLHeadingElement>(null)
   const isFirstRender = useRef(true)
   const input = toIssueInput(draft)
@@ -39,14 +40,22 @@ export function StudentSubmitPage() {
   }, [step])
 
   const handleSubmit = () => {
-    if (!input || result) return
-    setResult(submitIssue(input))
+    if (!input || submittedIssue) return
+    const result = submitIssue(input)
+    if (!result.ok) {
+      // 保存できなかった投稿は確定しない。選んだ内容を残したまま確認画面で再試行できるようにする
+      setFailedAttempts((count) => count + 1)
+      return
+    }
+    setSubmittedIssue(result.issue)
+    setFailedAttempts(0)
     setStep('done')
   }
 
   const handleSubmitAnother = () => {
     setDraft(EMPTY_DRAFT)
-    setResult(null)
+    setSubmittedIssue(null)
+    setFailedAttempts(0)
     setStep('input')
   }
 
@@ -70,27 +79,33 @@ export function StudentSubmitPage() {
             {STEP_HEADINGS[step]}
           </h2>
 
-          {step === 'input' && (
-            <IssueInputStep
-              draft={draft}
-              onDraftChange={setDraft}
-              onNext={() => setStep('confirm')}
-            />
-          )}
-          {step === 'confirm' && input && (
-            <IssueConfirmStep
-              input={input}
-              onBack={() => setStep('input')}
-              onSubmit={handleSubmit}
-            />
-          )}
-          {step === 'done' && result && (
-            <IssueSubmittedStep
-              issue={result.issue}
-              persisted={result.persisted}
-              onSubmitAnother={handleSubmitAnother}
-            />
-          )}
+          {/* ステップの切り替え時に控えめなフェードを入れる（動きを減らす設定では無効） */}
+          <div key={step} className="animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
+            {step === 'input' && (
+              <IssueInputStep
+                draft={draft}
+                onDraftChange={setDraft}
+                onNext={() => setStep('confirm')}
+              />
+            )}
+            {step === 'confirm' && input && (
+              <IssueConfirmStep
+                input={input}
+                onBack={() => {
+                  setFailedAttempts(0)
+                  setStep('input')
+                }}
+                failedAttempts={failedAttempts}
+                onSubmit={handleSubmit}
+              />
+            )}
+            {step === 'done' && submittedIssue && (
+              <IssueSubmittedStep
+                issue={submittedIssue}
+                onSubmitAnother={handleSubmitAnother}
+              />
+            )}
+          </div>
         </section>
       </div>
     </div>

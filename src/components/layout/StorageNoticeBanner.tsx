@@ -13,11 +13,7 @@ const MESSAGES: Record<StorageNotice, { text: string; isError: boolean }> = {
     isError: false,
   },
   unavailable: {
-    text: 'このブラウザではデータを保存できません。投稿はこの画面を開いている間だけ表示され、再読み込みすると消えます。',
-    isError: true,
-  },
-  'save-failed': {
-    text: 'データを保存できませんでした。投稿はこの画面を開いている間だけ表示され、再読み込みすると消えます。',
+    text: 'このブラウザではデータを保存できないため、投稿や対応の記録ができません。ブラウザの設定（プライベートモードなど）を確認してください。',
     isError: true,
   },
 }

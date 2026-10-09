@@ -252,7 +252,18 @@ export function ImprovementEditor({ issue, improvement }: ImprovementEditorProps
       <div className="sticky bottom-0 z-20 -mx-4 border-t border-border bg-card/95 px-4 py-3 shadow-raised backdrop-blur sm:-mx-6 sm:px-6 lg:mx-0 lg:rounded-2xl lg:border">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div role="status" aria-live="polite" className="min-w-0 text-sm font-bold">
-            <SaveStatus issueId={issue.id} isDirty={isDirty} saveResult={saveResult} studentLinkState={studentLinkState} />
+            {/* 表示内容が変わったときだけ、控えめなフェードで切り替える */}
+            <div
+              key={saveResult?.kind ?? (isDirty ? 'dirty' : 'clean')}
+              className="animate-in fade-in-0 duration-200"
+            >
+              <SaveStatus
+                issueId={issue.id}
+                isDirty={isDirty}
+                saveResult={saveResult}
+                studentLinkState={studentLinkState}
+              />
+            </div>
           </div>
           <div className="flex shrink-0 gap-2">
             <Button

@@ -2,18 +2,17 @@ import { createContext } from 'react'
 import type { ImprovementUpdate } from '@/lib/improvementRules'
 import type { DemoState, Issue, NewIssueInput } from '@/types/issue'
 
-/** 画面上部に表示する、保存に関するお知らせ */
-export type StorageNotice =
-  | 'reset-invalid'
-  | 'reset-version'
-  | 'unavailable'
-  | 'save-failed'
+/** 画面上部に表示する、保存データに関するお知らせ */
+export type StorageNotice = 'reset-invalid' | 'reset-version' | 'unavailable'
 
-export interface SubmitIssueResult {
-  issue: Issue
-  /** localStorage への保存に成功したか（失敗時はこのタブのメモリ上にだけ存在する） */
-  persisted: boolean
-}
+/**
+ * 状態を変更する操作の結果。
+ * どの操作も「ブラウザへの保存に成功した変更だけを確定する」。
+ * save-failed の場合、状態・履歴は一切変わっていない。
+ */
+export type SubmitIssueResult =
+  | { ok: true; issue: Issue }
+  | { ok: false; reason: 'save-failed' }
 
 export type UpdateIssueResponseResult =
   | {
@@ -23,22 +22,22 @@ export type UpdateIssueResponseResult =
     }
   | {
       ok: false
-      /**
-       * not-found：投稿が存在しない／invalid：入力内容が正しくない／
-       * save-failed：ブラウザに保存できなかった（変更は反映していない）
-       */
+      /** not-found：投稿が存在しない／invalid：入力内容が正しくない／save-failed：保存できなかった */
       reason: 'not-found' | 'invalid' | 'save-failed'
     }
+
+export type ResetDemoStateResult = { ok: true } | { ok: false; reason: 'save-failed' }
 
 export interface DemoStateContextValue {
   state: DemoState
   storageNotice: StorageNotice | null
   dismissStorageNotice: () => void
+  /** 生徒が困りごとを投稿する */
   submitIssue: (input: NewIssueInput) => SubmitIssueResult
   /** 先生が対応状況と改善記録を保存する */
   updateIssueResponse: (issueId: string, update: ImprovementUpdate) => UpdateIssueResponseResult
-  /** デモデータを初期状態に戻す。保存に成功したかを返す */
-  resetDemoState: () => { persisted: boolean }
+  /** デモデータを初期状態に戻す */
+  resetDemoState: () => ResetDemoStateResult
 }
 
 export const DemoStateContext = createContext<DemoStateContextValue | null>(null)

@@ -42,7 +42,7 @@ export function TeacherIssuePage() {
         <div className="space-y-4">
           <PageHeader
             title="改善プランの検討"
-            description="困りごとの内容を確認し、改善の方法と対応状況を記録します。最終的な判断は先生が行います。"
+            description="困りごとを確認し、改善の方法と対応状況を記録します。最終的な判断は先生が行います。"
             audience={AUDIENCES.teacher}
           />
           <TeacherDemoNote />

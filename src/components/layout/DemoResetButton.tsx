@@ -20,14 +20,11 @@ export function DemoResetButton() {
   const [result, setResult] = useState<{ text: string; ok: boolean } | null>(null)
 
   const handleReset = () => {
-    const { persisted } = resetDemoState()
+    const result = resetDemoState()
     setResult(
-      persisted
+      result.ok
         ? { text: 'デモデータを初期状態に戻しました。', ok: true }
-        : {
-            text: '初期状態に戻しましたが、保存できませんでした。再読み込みすると元に戻る場合があります。',
-            ok: false,
-          },
+        : { text: 'ブラウザに保存できなかったため、初期状態に戻せませんでした。', ok: false },
     )
   }
 
